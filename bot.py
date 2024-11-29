@@ -7,6 +7,7 @@ from backend.models.user_model import UserModel
 from frontend.cogs.cache import Cache
 from frontend.cogs.users import UserManagement
 from frontend.cogs.profile import Profile
+from frontend.cogs.dungeon import Dungeon
 
 class RedBot(commands.Bot):
     def __init__(self) -> None:
@@ -25,6 +26,7 @@ class RedBot(commands.Bot):
         await self.add_cog(Cache(self))
         await self.add_cog(UserManagement(self, self.shared_user_model))
         await self.add_cog(Profile(self, self.shared_user_model, CLASS_DATA))
+        await self.add_cog(Dungeon(self, self.shared_user_model))
         await self.tree.sync()
 
     async def on_ready(self) -> None:
