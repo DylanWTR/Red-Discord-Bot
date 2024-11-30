@@ -1,12 +1,12 @@
 import discord
 from discord.ext import commands, tasks
-from config.settings import STATS_CHANNEL_ID
+from config.settings import STATS_CHANNEL_ID, STATS_MESSAGE_ID
 from config.emojis import EMOJI_LOGO
+
 
 class RoleStats(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.message_id = None
         self.update_stats.start()
 
     def cog_unload(self):
@@ -44,19 +44,18 @@ class RoleStats(commands.Cog):
             else:
                 embed.description += f"{emoji} **{role_name}**: Rôle non trouvé\n"
 
-        if self.message_id:
+        if STATS_MESSAGE_ID:
             try:
-                message = await channel.fetch_message(self.message_id)
+                message = await channel.fetch_message(STATS_MESSAGE_ID)
                 await message.edit(embed=embed)
             except discord.NotFound:
-                self.message_id = None
-                print("Échec de la mise à jour.")
-
-        if not self.message_id:
+                STATS_MESSAGE_ID = 0
+                print("Message non trouvé. Réinitialisation de STATS_MESSAGE_ID.")
+        if not STATS_MESSAGE_ID:
             try:
                 message = await channel.send(embed=embed)
-                self.message_id = message.id
-                print("Nouvel embed créé.")
+                STATS_MESSAGE_ID = message.id
+                print("Nouvel embed créé et STATS_MESSAGE_ID mis à jour.")
             except Exception as e:
                 print(f"Échec de la création du nouvel embed : {e}")
 
