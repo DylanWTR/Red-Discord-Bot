@@ -47,12 +47,21 @@ class Dungeon(commands.Cog):
             )
             return
 
+        undo_data = {
+            "1-50": 0,
+            "51-100": 0,
+            "101-150": 0,
+            "151-200": 0,
+            "200+": 0,
+            "rankup": False
+        }
+        await self.user_model.update_undo(interaction.user.id, undo_data)
+
         completions = user_document["stats"]["completions"]
         completions[dungeon_index] += 1
 
         dungeon_level = dungeon_info["lvl"]
 
-        # Explicit handling for "200+" dungeons
         points_field = (
             "200+" if dungeon_level == 200 and dungeon_info.get("hard") else
             "1-50" if dungeon_level <= 50 else
@@ -64,7 +73,6 @@ class Dungeon(commands.Cog):
         current_points = user_document["stats"]["points"]
         new_points = dungeon_info["points"]
 
-        # Get the maximum value for the range and calculate 200% limit
         if points_field not in RANGES_VALUES:
             await interaction.response.send_message(
                 f"Error: Range '{points_field}' not found in configuration.",
@@ -75,7 +83,6 @@ class Dungeon(commands.Cog):
         range_max = RANGES_VALUES[points_field]
         double_range_max = range_max * 2
 
-        # If points exceed 200%, set them to max value * 2
         if current_points[points_field] > double_range_max:
             current_points[points_field] = double_range_max
             await self.user_model.update_user_stats(
@@ -88,12 +95,10 @@ class Dungeon(commands.Cog):
             )
             return
 
-        # Add points, but ensure they don't exceed the limit
         current_points[points_field] += new_points
         if current_points[points_field] > double_range_max:
             current_points[points_field] = double_range_max
 
-        # Update total points
         current_points["total"] += new_points
 
         await self.user_model.update_user_stats(
@@ -105,12 +110,24 @@ class Dungeon(commands.Cog):
         updated_rank = await self.check_rank_up(user_rank, current_points)
 
         rank_message = ""
+        rank_up = False
         if updated_rank != user_rank:
             await self.user_model.update_user_stats(
                 interaction.user.id,
                 {"rank": updated_rank}
             )
+            rank_up = True
             rank_message = f"\n🎉 Congratulations! You've ranked up to **{updated_rank}**!"
+
+        undo_data = {
+            "1-50": new_points if points_field == "1-50" else 0,
+            "51-100": new_points if points_field == "51-100" else 0,
+            "101-150": new_points if points_field == "101-150" else 0,
+            "151-200": new_points if points_field == "151-200" else 0,
+            "200+": new_points if points_field == "200+" else 0,
+            "rankup": rank_up
+        }
+        await self.user_model.update_undo(interaction.user.id, undo_data)
 
         response_message = (
             f"**Dungeon Completed**: {dungeon_info['dungeon']}\n"

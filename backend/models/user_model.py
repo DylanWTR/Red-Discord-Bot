@@ -54,6 +54,32 @@ class UserModel:
             print(f"Error creating user <{username}:{user_id}>: {e}")
             return False
 
+    async def initialize_undo(self, user_id: int) -> None:
+        """Initialize the undo field for a user."""
+        undo_data = {
+            "undo": {
+                "1-50": 0,
+                "51-100": 0,
+                "101-150": 0,
+                "151-200": 0,
+                "200+": 0,
+                "rankup": False,
+            }
+        }
+        await self._users_collection.update_one(
+            {"user_id": user_id},
+            {"$set": undo_data},
+            upsert=True
+        )
+
+    async def update_undo(self, user_id: int, undo_data: dict) -> None:
+        """Update the undo field for a user."""
+        await self._users_collection.update_one(
+            {"user_id": user_id},
+            {"$set": {"undo": undo_data}}
+        )
+
+
     async def update_user_stats(self, user_id: int, stats_update: dict) -> bool:
         """Updates the stats for a user."""
         try:
