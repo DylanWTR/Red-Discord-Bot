@@ -79,14 +79,12 @@ class Profile(commands.Cog):
             )
 
     def create_progress_bar(self, current_value, max_value):
-        """Generate a progress bar for the given range using 5% blocks with proper overflow handling."""
-        percentage = (current_value / max_value) * 100
-        total_blocks = int((percentage / 5))
-        base_blocks = min(total_blocks, 20)
-        overflow_blocks = min(max(0, total_blocks - 20), 20)
+        """Generate a progress bar with percentage and current/goal points."""
+        percentage = min((current_value / max_value) * 100, 100)
+        total_blocks = int(percentage / 5)
 
-        bar = f"[{'█' * overflow_blocks}{'░' * (base_blocks - overflow_blocks)}{'▁' * (20 - base_blocks)}]"
-        return f"{bar} ({percentage:.0f}%)"
+        bar = f"{'█' * total_blocks}{'░' * (20 - total_blocks)}"
+        return f"{bar} ({percentage:.0f}%, {current_value}/{max_value})"
 
     def create_profile_embed(self, member: discord.Member):
         """Create the profile embed."""
@@ -97,17 +95,18 @@ class Profile(commands.Cog):
         embed_color = discord.Color(int(color_hex.strip("#"), 16))
 
         embed = discord.Embed(
-            title="Profile Information",
-            description=f"{member.mention}'s Profile\n**Class:** {class_display}",
+            title=f"{member.display_name}",
+            description=f"**Classe:** {class_display}",
             color=embed_color
         )
         embed.add_field(name='\u200B', value="\u200B", inline=False)
         embed.add_field(name="Points: ", value=self.total_points, inline=False)
-        embed.add_field(name="Range: 1-50",value=self.create_progress_bar(self.start_dungeons, RANGES_VALUES["1-50"]),inline=False)
-        embed.add_field(name="Range: 51-100",value=self.create_progress_bar(self.early_dungeons, RANGES_VALUES["51-100"]),inline=False)
-        embed.add_field(name="Range: 101-150",value=self.create_progress_bar(self.mid_dungeons, RANGES_VALUES["101-150"]),inline=False)
-        embed.add_field(name="Range: 151-200",value=self.create_progress_bar(self.late_dungeons, RANGES_VALUES["151-200"]),inline=False)
-        embed.add_field(name="Range: 200+",value=self.create_progress_bar(self.end_dungeons, RANGES_VALUES["200+"]),inline=False)
+        embed.add_field(name='\u200B', value="Nombres de Donjon Down :", inline=False)
+        embed.add_field(name="1-50",value=self.create_progress_bar(self.start_dungeons, RANGES_VALUES["1-50"] * 2),inline=False)
+        embed.add_field(name="51-100",value=self.create_progress_bar(self.early_dungeons, RANGES_VALUES["51-100"] * 2),inline=False)
+        embed.add_field(name="101-150",value=self.create_progress_bar(self.mid_dungeons, RANGES_VALUES["101-150"] * 2),inline=False)
+        embed.add_field(name="151-200",value=self.create_progress_bar(self.late_dungeons, RANGES_VALUES["151-200"] * 2),inline=False)
+        embed.add_field(name="200+",value=self.create_progress_bar(self.end_dungeons, RANGES_VALUES["200+"] * 2),inline=False)
         embed.add_field(name="Rank", value=self.rank, inline=False)
         return embed
 

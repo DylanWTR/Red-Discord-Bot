@@ -8,7 +8,8 @@ RANGES_VALUES = {
 
 RANKS_TRESHOLDS = {
     "Unranked": 0,
-    "Bronze": 68,
+    "Iron": 68,
+    "Bronze": 136,
     "Silver": 363,
     "Gold": 726,
     "Platinum": 1082,
@@ -16,6 +17,6 @@ RANKS_TRESHOLDS = {
     "Diamond": 2830,
     "Master": 5660,
     "Grandmaster": 3347,
-    "Challenger_1": 6694,
-    "Challenger_2": 13388,
+    "Challenger": 6694,
+    # "Challenger": 13388,
 }
