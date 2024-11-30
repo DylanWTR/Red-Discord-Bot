@@ -1,9 +1,9 @@
 RANGES_VALUES = {
     "1-50": 68,
-    "51-100": 227,
-    "101-150": 356,
-    "151-200": 666,
-    "200+": 517,
+    "51-100": 363,
+    "101-150": 1082,
+    "151-200": 2830,
+    "200+": 6177,
 }
 
 RANKS_TRESHOLDS = {
@@ -16,7 +16,6 @@ RANKS_TRESHOLDS = {
     "Emerald": 2164,
     "Diamond": 2830,
     "Master": 5660,
-    "Grandmaster": 3347,
-    "Challenger": 6694,
-    # "Challenger": 13388,
+    "Grandmaster": 6177,
+    "Challenger": 12354,
 }
