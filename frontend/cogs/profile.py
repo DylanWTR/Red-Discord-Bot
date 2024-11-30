@@ -79,16 +79,19 @@ class Profile(commands.Cog):
             )
 
     def create_progress_bar(self, current_value, max_value):
-        """Generate a progress bar with current and goal split visually."""
-        percentage = min((current_value / max_value) * 100, 100) if max_value > 0 else 0
-        total_blocks = 20
-        filled_blocks = int((current_value / max_value) * total_blocks) if max_value > 0 else 0
+        """Generate a balanced progress bar with 50% on each side."""
+        percentage = (current_value / max_value) * 100
 
-        filled_bar = '█' * filled_blocks
-        empty_bar = '░' * (total_blocks - filled_blocks)
+        left_percentage = min(percentage, 50)
+        right_percentage = max(0, percentage - 50)
 
-        bar = f"{filled_bar[:10]} | {empty_bar[10:]}"
-        return f"{bar} {percentage:.0f}%"
+        left_blocks = int(left_percentage / 5)
+        right_blocks = int(right_percentage / 5)
+
+        left_bar = f"{'█' * left_blocks}{'░' * (10 - left_blocks)}"
+        right_bar = f"{'█' * right_blocks}{'░' * (10 - right_blocks)}"
+
+        return f"{left_bar} | {right_bar} {percentage:.0f}%"
 
     def create_profile_embed(self, member: discord.Member):
         """Create the profile embed."""
