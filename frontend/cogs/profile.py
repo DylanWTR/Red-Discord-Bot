@@ -121,8 +121,13 @@ class Profile(commands.Cog):
         await interaction.response.send_message(embed=embed, files=[thumbnail_file, rank_file])
 
     def get_matching_role(self, member: discord.Member):
-        """Find the first role matching a key in `classes`."""
-        return next((role.name for role in member.roles if role.name in self.classes), None)
+        """Find the first role matching a key in `classes` (case-insensitive)."""
+        class_keys_lower = {key.lower(): key for key in self.classes}
+        for role in member.roles:
+            role_name_lower = role.name.lower()
+            if role_name_lower in class_keys_lower:
+                return class_keys_lower[role_name_lower]
+        return None
 
     @staticmethod
     def image_to_file(image, filename):
