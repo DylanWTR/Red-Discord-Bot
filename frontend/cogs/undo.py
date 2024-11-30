@@ -16,14 +16,14 @@ class Undo(commands.Cog):
 
         if not user_document:
             await interaction.response.send_message(
-                "You don't have a profile yet. Please create one first.", ephemeral=True
+                "Tu n'as pas encore de profil. Contactes un admin.", ephemeral=True
             )
             return
 
         undo_data = user_document.get("undo", None)
         if not undo_data or all(value == 0 for key, value in undo_data.items() if key != "rankup") and not undo_data["rankup"]:
             await interaction.response.send_message(
-                "There's nothing to undo.", ephemeral=True
+                "Il n'y a rien à annuler.", ephemeral=True
             )
             return
 
@@ -61,9 +61,9 @@ class Undo(commands.Cog):
         await self.user_model.update_undo(interaction.user.id, undo_reset)
 
         response_message = (
-            f"✅ Your last dungeon completion has been undone.\n"
-            f"**Rank**: {stats['rank']}\n"
-            f"**Total Points**: {current_points['total']}"
+            f"✅ Ton dernier achèvement de donjon à été annulé.\n"
+            f"**Rang**: {stats['rank']}\n"
+            f"**Points totaux**: {current_points['total']}"
         )
 
         await interaction.response.send_message(response_message)

@@ -25,7 +25,7 @@ class Dungeon(commands.Cog):
 
         if not closest_match:
             await interaction.response.send_message(
-                f"No dungeon found for '{boss_name}'.", ephemeral=True
+                f"Pas de donjon trouvé pour '{boss_name}'.", ephemeral=True
             )
             return
 
@@ -35,7 +35,7 @@ class Dungeon(commands.Cog):
         dungeon_index = dungeon_info.get("index")
         if dungeon_index is None:
             await interaction.response.send_message(
-                f"Error: Dungeon '{dungeon_info['dungeon']}' is missing an index.", ephemeral=True
+                f"Error: le donjon '{dungeon_info['dungeon']}' n'a pas d'index. Contactes un admin.", ephemeral=True
             )
             return
 
@@ -43,7 +43,7 @@ class Dungeon(commands.Cog):
 
         if not user_document:
             await interaction.response.send_message(
-                "You don't have a profile yet. Please create one first.", ephemeral=True
+                "Tu n'as pas encore de profil. Contactes un admin.", ephemeral=True
             )
             return
 
@@ -75,7 +75,7 @@ class Dungeon(commands.Cog):
 
         if points_field not in RANGES_VALUES:
             await interaction.response.send_message(
-                f"Error: Range '{points_field}' not found in configuration.",
+                f"Error: Le champ '{points_field}' n'a pas été trouvé dans la configuration.",
                 ephemeral=True
             )
             return
@@ -119,7 +119,7 @@ class Dungeon(commands.Cog):
                 {"rank": updated_rank}
             )
             rank_up = True
-            rank_message = f"\n🎉 Congratulations! You've ranked up to **{updated_rank}**!"
+            rank_message = f"\n🎉 Félicitation! Tu est passé **{updated_rank}**!"
 
             guild = interaction.guild
             if guild:
@@ -136,7 +136,7 @@ class Dungeon(commands.Cog):
                     rank_role = discord.utils.get(guild.roles, name=updated_rank)
                     if rank_role:
                         await member.add_roles(rank_role, reason="Ranked up in dungeon game")
-                        rank_message += f"\nYou have been given the **{updated_rank}** role!"
+                        rank_message += f"\nTu as reçu le rang **{updated_rank}** !"
 
         undo_data = {
             "1-50": new_points if points_field == "1-50" else 0,
@@ -149,10 +149,10 @@ class Dungeon(commands.Cog):
         await self.user_model.update_undo(interaction.user.id, undo_data)
 
         response_message = (
-            f"**Dungeon Completed**: {dungeon_info['dungeon']}\n"
+            f"**Donjon complété**: {dungeon_info['dungeon']}\n"
             f"**Boss**: {matched_boss}\n"
-            f"**Level**: {dungeon_info['lvl']}\n"
-            f"**Points Earned**: {new_points}\n"
+            f"**Niveau**: {dungeon_info['lvl']}\n"
+            f"**Points gagnés**: {new_points}\n"
             f"{rank_message}"
         )
 
