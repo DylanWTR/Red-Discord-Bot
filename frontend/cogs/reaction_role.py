@@ -1,20 +1,19 @@
 import discord
 from discord.ext import commands
+from config.settings import REACTION_ROLE_CHANNEL_ID, REACTION_ROLE_EMOJI_ID
 
 class ReactionRole(commands.Cog):
     """Cog to manage reaction-based role assignment."""
 
     def __init__(self, bot):
         self.bot = bot
-        self.reaction_id = 1312379145484767285
-        self.channel_id = 1311626083799535648
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
         """Handles reaction events to update roles."""
-        if payload.channel_id != self.channel_id:
+        if payload.channel_id != REACTION_ROLE_CHANNEL_ID:
             return
-        if str(payload.emoji) != self.reaction_id:
+        if str(payload.emoji) != REACTION_ROLE_EMOJI_ID:
             return
 
         guild = self.bot.get_guild(payload.guild_id)
