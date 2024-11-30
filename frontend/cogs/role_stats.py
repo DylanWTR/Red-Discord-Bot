@@ -50,7 +50,7 @@ class RoleStats(commands.Cog):
                 await message.edit(embed=embed)
             except discord.NotFound:
                 self.message_id = None
-                print("Échec de la mise à jour.")
+                print("Échec de la mise à jour. Message introuvable.")
 
         if not self.message_id:
             try:
@@ -63,3 +63,18 @@ class RoleStats(commands.Cog):
     @update_stats.before_loop
     async def before_update_stats(self):
         await self.bot.wait_until_ready()
+
+        channel = self.bot.get_channel(STATS_CHANNEL_ID)
+        if not channel:
+            print("Le canal n'a pas été trouvé lors de l'initialisation.")
+            return
+
+        if self.message_id:
+            try:
+                await channel.fetch_message(self.message_id)
+                print("Message existant trouvé.")
+            except discord.NotFound:
+                self.message_id = None
+                print("Message introuvable lors de l'initialisation.")
+            except Exception as e:
+                print(f"Erreur lors de la récupération du message : {e}")
