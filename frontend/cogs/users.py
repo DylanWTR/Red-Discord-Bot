@@ -30,7 +30,21 @@ class UserManagement(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
-        """Creates a profile when a user joins the server."""
+        """Creates a profile and adds 'Check-Up' role when a user joins the server."""
         if member.bot:
             return
+
         await self.ensure_user_profile(member.id, member.name)
+
+        check_up_role_name = "Check-Up"
+        check_up_role = discord.utils.get(member.guild.roles, name=check_up_role_name)
+        if check_up_role:
+            try:
+                await member.add_roles(check_up_role)
+                print(f"Assigned 'Check-Up' role to {member.name}.")
+            except discord.Forbidden:
+                print(f"Missing permissions to assign roles to {member.name}.")
+            except discord.HTTPException as e:
+                print(f"Failed to assign 'Check-Up' role to {member.name}: {e}")
+        else:
+            print(f"Role '{check_up_role_name}' not found in the server.")
