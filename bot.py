@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from config.settings import TOKEN
-from config.class_data import CLASS_DATA
+from config.emojis import EMOJI_ARTWORK
 
 from backend.models.user_model import UserModel
 from frontend.cogs.cache import Cache
@@ -25,7 +25,7 @@ class RedBot(commands.Bot):
         """Sets up bot cogs and syncs command tree."""
         await self.add_cog(Cache(self))
         await self.add_cog(UserManagement(self, self.shared_user_model))
-        await self.add_cog(Profile(self, self.shared_user_model, CLASS_DATA))
+        await self.add_cog(Profile(self, self.shared_user_model, EMOJI_ARTWORK))
         await self.add_cog(Dungeon(self, self.shared_user_model))
         await self.tree.sync()
 

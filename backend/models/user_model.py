@@ -41,7 +41,7 @@ class UserModel:
                     "151-200": 0,
                     "200+": 0,
                 },
-                "rank": "",
+                "rank": "Unranked",
                 "completions": completions_array
             }
         }

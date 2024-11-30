@@ -1,80 +1,136 @@
 import discord
+from discord import app_commands
 from discord.ext import commands
 from io import BytesIO
-from PIL import Image
 from backend.models.user_model import UserModel
-
+from config.ranks import RANGES_VALUES
+from config.emojis import EMOJI_LOGO, EMOJI_COLOR
 
 class Profile(commands.Cog):
-    def __init__(self, bot, user_model: UserModel, classes: dict):
+    def __init__(self, bot: commands.Bot, user_model: UserModel, classes: dict):
         self.bot = bot
         self.user_model = user_model
         self.classes = classes
         self.cache_cog = self.bot.get_cog("Cache")
 
-    @commands.command(name='profile')
-    async def profile(self, ctx, member: discord.Member = None):
-        """Display the profile of a user."""
-        member = member or ctx.author
+        self.matching_role = None
+        self.total_points = "0"
+        self.start_dungeons = "0"
+        self.early_dungeons = "0"
+        self.mid_dungeons = "0"
+        self.late_dungeons = "0"
+        self.end_dungeons = "0"
+        self.rank = "Unranked"
+        self.thumbnail = None
+        self.image = None
 
-        user_document = await self.user_model.get_user(member.id)
-        matching_role = self.get_matching_role(member)
-
-        thumbnail_image = self.get_cached_image(ctx, self.cache_cog.avatar_cache, f"{matching_role}.png")
-        if not thumbnail_image:
+    @app_commands.command(name="profile", description="Display the profile of a user.")
+    async def profile(self, interaction: discord.Interaction, member: discord.Member = None):
+        member = member or interaction.user
+        user_document = await self.fetch_user_document(interaction, member)
+        if not user_document:
             return
 
-        user_rank = user_document.get("stats", {}).get("rank")
-        rank_image = self.get_cached_image(ctx, self.cache_cog.rank_cache, f"{user_rank}.png") if user_rank else None
+        self.populate_fields(user_document)
+        await self.prepare_images(interaction, member)
 
+        embed = self.create_profile_embed(member)
+        await self.send_embed(interaction, embed)
+
+    async def fetch_user_document(self, interaction: discord.Interaction, member: discord.Member):
+        """Fetch the user document from the database."""
+        user_document = await self.user_model.get_user(member.id)
+        if not user_document:
+            await interaction.response.send_message(
+                f"{member.mention} does not have a profile yet. Please contact an admin.",
+                ephemeral=True
+            )
+        return user_document
+
+    def populate_fields(self, user_document):
+        """Populate the embed fields from the user document."""
         stats = user_document.get("stats", {})
-        embed = self.create_profile_embed(member, stats, matching_role, user_rank)
-        files = self.prepare_files(thumbnail_image, matching_role, rank_image, user_rank)
+        points = stats.get("points", {})
+        self.total_points = str(points.get("total", 0))
+        self.start_dungeons = int(points.get("1-50", 0))
+        self.early_dungeons = int(points.get("51-100", 0))
+        self.mid_dungeons = int(points.get("101-150", 0))
+        self.late_dungeons = int(points.get("151-200", 0))
+        self.end_dungeons = int(points.get("200+", 0))
+        self.rank = stats.get("rank", "Unranked")
 
-        await ctx.send(embed=embed, files=files)
+    async def prepare_images(self, interaction: discord.Interaction, member: discord.Member):
+        """Retrieve and cache thumbnail and rank images."""
+        self.matching_role = self.get_matching_role(member)
+
+        self.thumbnail = self.cache_cog.avatar_cache.get(f"{self.matching_role}.png")
+        if not self.thumbnail:
+            await interaction.response.send_message(
+                f"Avatar image for role '{self.matching_role}' not found. Please contact an admin.",
+                ephemeral=True
+            )
+            return
+
+        self.image = self.cache_cog.rank_cache.get(f"{self.rank}.png")
+        if not self.image:
+            await interaction.response.send_message(
+                f"Rank image for rank '{self.rank}' not found. Please contact an admin.",
+                ephemeral=True
+            )
+
+    def create_progress_bar(self, current_value, max_value):
+        """Generate a progress bar for the given range using 5% blocks with proper overflow handling."""
+        percentage = (current_value / max_value) * 100
+        total_blocks = int((percentage / 5))
+        base_blocks = min(total_blocks, 20)
+        overflow_blocks = min(max(0, total_blocks - 20), 20)
+
+        bar = f"[{'█' * overflow_blocks}{'░' * (base_blocks - overflow_blocks)}{'▁' * (20 - base_blocks)}]"
+        return f"{bar} ({percentage:.0f}%)"
+
+    def create_profile_embed(self, member: discord.Member):
+        """Create the profile embed."""
+        class_logo = EMOJI_LOGO.get(self.matching_role.lower(), "") if self.matching_role else ""
+        class_display = f"{class_logo} **{self.matching_role}**" if self.matching_role else "None"
+
+        color_hex = EMOJI_COLOR.get(self.matching_role.lower(), "#3498db")
+        embed_color = discord.Color(int(color_hex.strip("#"), 16))
+
+        embed = discord.Embed(
+            title="Profile Information",
+            description=f"{member.mention}'s Profile\n**Class:** {class_display}",
+            color=embed_color
+        )
+        embed.add_field(name='\u200B', value="\u200B", inline=False)
+        embed.add_field(name="Points: ", value=self.total_points, inline=False)
+        embed.add_field(name="Range: 1-50",value=self.create_progress_bar(self.start_dungeons, RANGES_VALUES["1-50"]),inline=False)
+        embed.add_field(name="Range: 51-100",value=self.create_progress_bar(self.early_dungeons, RANGES_VALUES["51-100"]),inline=False)
+        embed.add_field(name="Range: 101-150",value=self.create_progress_bar(self.mid_dungeons, RANGES_VALUES["101-150"]),inline=False)
+        embed.add_field(name="Range: 151-200",value=self.create_progress_bar(self.late_dungeons, RANGES_VALUES["151-200"]),inline=False)
+        embed.add_field(name="Range: 200+",value=self.create_progress_bar(self.end_dungeons, RANGES_VALUES["200+"]),inline=False)
+        embed.add_field(name="Rank", value=self.rank, inline=False)
+        return embed
+
+    async def send_embed(self, interaction: discord.Interaction, embed: discord.Embed):
+        """Send the embed to the user."""
+        thumbnail_file = self.image_to_file(self.thumbnail, "thumbnail.png")
+        embed.set_thumbnail(url=f"attachment://thumbnail.png")
+
+        rank_file = self.image_to_file(self.image, "rank.png")
+        embed.set_image(url=f"attachment://rank.png")
+
+        await interaction.response.send_message(embed=embed, files=[thumbnail_file, rank_file])
 
     def get_matching_role(self, member: discord.Member):
         """Find the first role matching a key in `classes`."""
         return next((role.name for role in member.roles if role.name in self.classes), None)
 
-    def get_cached_image(self, ctx, cache: dict, key: str):
-        """Retrieve and scale an image from the cache."""
-        image = cache.get(key)
-        if not image:
-            ctx.send(f"Image for '{key}' not found in the cache.")
-            return None
-        return self.scale_image(image)
-
-    def scale_image(self, image: Image.Image, scale: int = 3) -> Image.Image:
-        """Scale an image by the specified factor."""
-        return image.resize((image.width * scale, image.height * scale), Image.Resampling.LANCZOS)
-
-    def prepare_files(self, thumbnail_image: Image.Image, matching_role: str, rank_image: Image.Image, user_rank: str):
-        """Prepare image files for sending with the embed."""
-        return [
-            self.image_to_file(thumbnail_image, f"{matching_role}.png"),
-            self.image_to_file(rank_image, f"{user_rank}.png") if rank_image else None
-        ]
-
     @staticmethod
-    def image_to_file(image: Image.Image, filename: str):
+    def image_to_file(image, filename):
         """Convert an image to a Discord file."""
+        if not image:
+            return None
         buffer = BytesIO()
         image.save(buffer, format="PNG")
         buffer.seek(0)
         return discord.File(fp=buffer, filename=filename)
-
-    def create_profile_embed(self, member: discord.Member, stats: dict, matching_role: str, user_rank: str):
-        """Create the embed for the profile."""
-        completions = stats.get("completions", {})
-        completions_text = "\n".join(f"{key} -> {value}" for key, value in completions.items())
-
-        embed = discord.Embed(
-            title=f"{member.name}'s Profile",
-            description=f"- **{stats.get('points', 0)} points**\n- **Donjons réalisés**\n{completions_text}",
-            color=discord.Color.red()
-        )
-        embed.set_thumbnail(url=f"attachment://{matching_role}.png")
-        if user_rank:
-            embed.set_image(url=f"attachment://{user_rank}.png")
-        return embed
