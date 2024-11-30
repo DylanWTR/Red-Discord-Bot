@@ -84,7 +84,7 @@ class Profile(commands.Cog):
         total_blocks = int(percentage / 5)
 
         bar = f"{'█' * total_blocks}{'░' * (20 - total_blocks)}"
-        return f"{bar} ({percentage:.0f}%, {current_value}/{max_value})"
+        return f"{bar} {percentage:.0f}%, {current_value}/{max_value}"
 
     def create_profile_embed(self, member: discord.Member):
         """Create the profile embed."""
