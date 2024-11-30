@@ -16,6 +16,6 @@ RANKS_TRESHOLDS = {
     "Emerald": 2164,
     "Diamond": 2830,
     "Master": 5660,
-    "Grandmaster": 6177,
+    "GrandMaster": 6177,
     "Challenger": 12354,
 }

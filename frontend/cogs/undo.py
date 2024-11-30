@@ -29,7 +29,6 @@ class Undo(commands.Cog):
 
         stats = user_document["stats"]
         current_points = stats["points"]
-        completions = stats["completions"]
 
         for points_field in ["1-50", "51-100", "101-150", "151-200", "200+"]:
             current_points[points_field] -= undo_data.get(points_field, 0)

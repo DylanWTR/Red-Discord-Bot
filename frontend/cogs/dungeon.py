@@ -89,10 +89,6 @@ class Dungeon(commands.Cog):
                 interaction.user.id,
                 {"points": current_points}
             )
-            await interaction.response.send_message(
-                f"Your points in range **{points_field}** have been capped at 100%.",
-                ephemeral=True
-            )
             return
 
         current_points[points_field] += new_points
@@ -116,8 +112,31 @@ class Dungeon(commands.Cog):
                 interaction.user.id,
                 {"rank": updated_rank}
             )
+        rank_up = False
+        if updated_rank != user_rank:
+            await self.user_model.update_user_stats(
+                interaction.user.id,
+                {"rank": updated_rank}
+            )
             rank_up = True
             rank_message = f"\n🎉 Congratulations! You've ranked up to **{updated_rank}**!"
+
+            guild = interaction.guild
+            if guild:
+                rank_roles = [role_name for role_name in RANKS_TRESHOLDS.keys()]
+                member = guild.get_member(interaction.user.id)
+
+                if member:
+                    roles_to_remove = [
+                        role for role in member.roles if role.name in rank_roles and role.name != updated_rank
+                    ]
+                    for role in roles_to_remove:
+                        await member.remove_roles(role, reason="Ranked up in dungeon game")
+
+                    rank_role = discord.utils.get(guild.roles, name=updated_rank)
+                    if rank_role:
+                        await member.add_roles(rank_role, reason="Ranked up in dungeon game")
+                        rank_message += f"\nYou have been given the **{updated_rank}** role!"
 
         undo_data = {
             "1-50": new_points if points_field == "1-50" else 0,
