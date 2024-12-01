@@ -12,7 +12,7 @@ class RoleStats(commands.Cog):
     def cog_unload(self):
         self.update_stats.cancel()
 
-    @tasks.loop(minutes=1)
+    @tasks.loop(minutes=10)
     async def update_stats(self):
         channel = self.bot.get_channel(STATS_CHANNEL_ID)
         if not channel:
@@ -43,6 +43,8 @@ class RoleStats(commands.Cog):
                 embed.description += f"{emoji} **{role.name}**: {members_count}\n"
             else:
                 embed.description += f"{emoji} **{role_name}**: Rôle non trouvé\n"
+
+        global STATS_MESSAGE_ID
 
         if STATS_MESSAGE_ID:
             try:

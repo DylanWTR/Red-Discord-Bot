@@ -32,7 +32,7 @@ class RedBot(commands.Bot):
         await self.add_cog(Dungeon(self, self.shared_user_model))
         await self.add_cog(Undo(self, self.shared_user_model))
         await self.add_cog(ReactionRole(self))
-        # await self.add_cog(RoleStats(self))
+        await self.add_cog(RoleStats(self))
         await self.tree.sync()
 
     async def on_ready(self) -> None:

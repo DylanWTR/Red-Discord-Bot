@@ -158,21 +158,24 @@ class Dungeon(commands.Cog):
 
         await interaction.response.send_message(response_message)
 
-async def check_rank_up(self, current_rank: str, points: dict) -> str:
-    """Check if a user qualifies for the next rank."""
-    ranks = list(RANKS_TRESHOLDS.keys())
-    current_rank_index = ranks.index(current_rank)
+    async def check_rank_up(self, current_rank: str, points: dict) -> str:
+        """Check if a user qualifies for the next rank."""
+        ranks = list(RANKS_TRESHOLDS.keys())
+        current_rank_index = ranks.index(current_rank)
 
-    if current_rank_index == len(ranks) - 1:
+        if current_rank_index == len(ranks) - 1:
+            return current_rank
+
+        next_rank = ranks[current_rank_index + 1]
+        required_points = RANKS_TRESHOLDS[next_rank]
+
+        cumulative_points = 0
+        for range_name, range_max in RANGES_VALUES.items():
+            cumulative_points += points.get(range_name, 0)
+
+            if required_points <= range_max or cumulative_points >= required_points:
+                if cumulative_points >= required_points:
+                    return next_rank
+                break
+
         return current_rank
-
-    next_rank = ranks[current_rank_index + 1]
-    required_points = RANKS_TRESHOLDS[next_rank]
-
-    for range_name, range_max in RANGES_VALUES.items():
-        if required_points <= range_max:
-            if points.get(range_name, 0) >= required_points:
-                return next_rank
-            break
-
-    return current_rank
