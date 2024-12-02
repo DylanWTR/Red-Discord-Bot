@@ -25,7 +25,7 @@ class Dungeon(commands.Cog):
         extra_6: Optional[discord.Member] = None,
         extra_7: Optional[discord.Member] = None
     ):
-        """Slash command to autocorrect and display dungeon info and update completion stats for multiple users."""
+        """Slash command to process a dungeon for multiple participants."""
         dungeon_info = self.get_dungeon_info(boss_name)
         if not dungeon_info:
             await interaction.response.send_message(
@@ -42,14 +42,22 @@ class Dungeon(commands.Cog):
         response_message += f"**Participants**: {participant_mentions}\n\n"
 
         rank_up_messages = []
+        undo_participants = {}
 
         for user in users_to_update:
-            rank_up_message = await self.process_user(user, dungeon_info, interaction)
+            undo_data, rank_up_message = await self.process_user(user, dungeon_info, interaction)
+            if undo_data:
+                undo_participants[str(user.id)] = undo_data
             if rank_up_message:
                 rank_up_messages.append(rank_up_message)
 
         if rank_up_messages:
             response_message += "\n".join(rank_up_messages)
+
+        await self.user_model.update_user_stats(
+            interaction.user.id,
+            {"undo": {"participants": undo_participants}}
+        )
 
         await interaction.response.send_message(response_message)
 
@@ -94,15 +102,15 @@ class Dungeon(commands.Cog):
             f"**Points gagnés**: {dungeon_info['points']}\n\n"
         )
 
-    async def process_user(self, user: discord.Member, dungeon_info: dict, interaction: discord.Interaction) -> Optional[str]:
-        """Process a single user: update stats, distribute points, and handle rank changes. Return rank-up message if applicable."""
+    async def process_user(self, user: discord.Member, dungeon_info: dict, interaction: discord.Interaction) -> tuple[dict, Optional[str]]:
+        """Process a single user: update stats, handle rank-ups, and prepare undo data."""
         user_document = await self.user_model.get_user(user.id)
         dungeon_index = dungeon_info.get("index")
         if dungeon_index is None:
             await interaction.response.send_message(
                 f"Error: le donjon '{dungeon_info['dungeon']}' n'a pas d'index. Contactes un admin.", ephemeral=True
             )
-            return None
+            return {}, None
 
         completions = user_document["stats"]["completions"]
         completions[dungeon_index] += 1
@@ -112,14 +120,27 @@ class Dungeon(commands.Cog):
         points_field = self.get_points_field(dungeon_level)
 
         current_points = user_document["stats"]["points"]
-        self.distribute_points(current_points, new_points, points_field)
+        undo_data = {
+            "total": 0,
+            "1-50": 0,
+            "51-100": 0,
+            "101-150": 0,
+            "151-200": 0,
+            "200+": 0,
+            "completion_index": dungeon_index,
+            "previous_rank": user_document["stats"]["rank"]
+        }
+
+        self.distribute_points_with_undo(current_points, new_points, points_field, undo_data)
         current_points["total"] += new_points
+        undo_data["total"] = new_points
 
         await self.user_model.update_user_stats(
             user.id,
             {"completions": completions, "points": current_points}
         )
 
+        # Handle rank-up
         user_rank = user_document["stats"]["rank"]
         updated_rank = await self.check_rank_up(user_rank, current_points, user)
 
@@ -128,9 +149,9 @@ class Dungeon(commands.Cog):
                 user.id,
                 {"rank": updated_rank}
             )
-            return f"Félicitations {user.mention} ! Tu es passé au rang **{updated_rank}** !"
+            return undo_data, f"Félicitations {user.mention} ! Tu es passé au rang **{updated_rank}** !"
 
-        return None
+        return undo_data, None
 
     def get_points_field(self, dungeon_level: int) -> str:
         """Determine the points field based on dungeon level."""
@@ -173,8 +194,8 @@ class Dungeon(commands.Cog):
 
         return current_rank
 
-    def distribute_points(self, current_points: dict, new_points: int, target_field: str):
-        """Distribute points starting from the lowest range up to the target range, with overflow capped at max range * 2."""
+    def distribute_points_with_undo(self, current_points: dict, new_points: int, target_field: str, undo_data: dict):
+        """Distribute points with undo tracking."""
         point_ranges = ["1-50", "51-100", "101-150", "151-200", "200+"]
         target_index = point_ranges.index(target_field)
 
@@ -190,8 +211,9 @@ class Dungeon(commands.Cog):
 
             if new_points <= available_space:
                 current_points[range_name] += new_points
-                new_points = 0
+                undo_data[range_name] += new_points
                 break
             else:
                 current_points[range_name] += available_space
+                undo_data[range_name] += available_space
                 new_points -= available_space

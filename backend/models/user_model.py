@@ -42,7 +42,16 @@ class UserModel:
                     "200+": 0,
                 },
                 "rank": "Unranked",
-                "completions": completions_array
+                "completions": completions_array,
+            },
+            "undo": {
+                "total": 0,
+                "1-50": 0,
+                "51-100": 0,
+                "101-150": 0,
+                "151-200": 0,
+                "200+": 0,
+                "completion_index": 0,
             }
         }
 
@@ -57,13 +66,18 @@ class UserModel:
     async def update_user_stats(self, user_id: int, stats_update: dict) -> bool:
         """Updates the stats for a user."""
         try:
-            update_query = {f"stats.{key}": value for key, value in stats_update.items()}
+            stats_fields = {f"stats.{key}": value for key, value in stats_update.items() if key != "undo"}
+            root_fields = {key: value for key, value in stats_update.items() if key == "undo"}
+
+            update_query = {"$set": {**stats_fields, **root_fields}}
+
             result = await self._users_collection.update_one(
                 {"user_id": user_id},
-                {"$set": update_query}
+                update_query
             )
+
             if result.modified_count > 0:
-                print(f"Updated stats for user {user_id}.")
+                print(f"Updated stats for user {user_id}")
                 return True
             else:
                 print(f"No stats updated for user {user_id}.")

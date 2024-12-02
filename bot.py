@@ -10,6 +10,7 @@ from frontend.cogs.profile import Profile
 from frontend.cogs.dungeon import Dungeon
 from frontend.cogs.reaction_role import ReactionRole
 from frontend.cogs.role_stats import RoleStats
+from frontend.cogs.undo import Undo
 
 class RedBot(commands.Bot):
     def __init__(self) -> None:
@@ -29,6 +30,7 @@ class RedBot(commands.Bot):
         await self.add_cog(UserManagement(self, self.shared_user_model))
         await self.add_cog(Profile(self, self.shared_user_model, EMOJI_ARTWORK))
         await self.add_cog(Dungeon(self, self.shared_user_model))
+        await self.add_cog(Undo(self, self.shared_user_model))
         await self.add_cog(ReactionRole(self))
         await self.add_cog(RoleStats(self))
         await self.tree.sync()
