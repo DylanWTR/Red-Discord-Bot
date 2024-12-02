@@ -1,46 +1,57 @@
 import discord
 from discord.ext import commands
-from config.settings import REACTION_ROLE_CHANNEL_ID, REACTION_ROLE_EMOJI_ID
 
 class ReactionRole(commands.Cog):
-    """Cog to manage reaction-based role assignment."""
-
     def __init__(self, bot):
         self.bot = bot
+        self.rules_channel_id = 1311626083799535648
+        self.rules_message_id = 1312379145484767285
+        self.initial_role_id = 1312483519267602552
+        self.new_role_id = 1312483623349391401
+        self.reaction_emoji = '✅'
+
+    async def manage_roles(self, member: discord.Member, action: str):
+        """Manage roles for a member based on the specified action."""
+        guild = member.guild
+        initial_role = guild.get_role(self.initial_role_id)
+        new_role = guild.get_role(self.new_role_id)
+
+        if not initial_role or not new_role:
+            return
+
+        if action == "add":
+            if initial_role in member.roles:
+                await member.remove_roles(initial_role, reason="Accepted rules.")
+                await member.add_roles(new_role, reason="Accepted rules.")
+        elif action == "remove":
+            if new_role in member.roles:
+                await member.add_roles(initial_role, reason="Reaction removed.")
+                await member.remove_roles(new_role, reason="Reaction removed.")
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
-        """Handles reaction events to update roles."""
-        if payload.channel_id != REACTION_ROLE_CHANNEL_ID:
-            return
-        if str(payload.emoji) != REACTION_ROLE_EMOJI_ID:
-            return
+        """Handle reaction add events."""
+        if (payload.message_id == self.rules_message_id
+                and payload.channel_id == self.rules_channel_id
+                and str(payload.emoji) == self.reaction_emoji):
+            guild = self.bot.get_guild(payload.guild_id)
+            if not guild:
+                return
 
-        guild = self.bot.get_guild(payload.guild_id)
-        if not guild:
-            return
+            member = guild.get_member(payload.user_id)
+            if member and not member.bot:
+                await self.manage_roles(member, action="add")
 
-        member = guild.get_member(payload.user_id)
-        if not member or member.bot:
-            return
+    @commands.Cog.listener()
+    async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
+        """Handle reaction remove events."""
+        if (payload.message_id == self.rules_message_id
+                and payload.channel_id == self.rules_channel_id
+                and str(payload.emoji) == self.reaction_emoji):
+            guild = self.bot.get_guild(payload.guild_id)
+            if not guild:
+                return
 
-        check_up_role_name = "Check-Up"
-        invite_role_name = "Invité"
-
-        check_up_role = discord.utils.get(guild.roles, name=check_up_role_name)
-        invite_role = discord.utils.get(guild.roles, name=invite_role_name)
-
-        try:
-            if check_up_role in member.roles:
-                await member.remove_roles(check_up_role)
-                print(f"Removed '{check_up_role_name}' role from {member.name}.")
-
-            if invite_role:
-                await member.add_roles(invite_role)
-                print(f"Added '{invite_role_name}' role to {member.name}.")
-            else:
-                print(f"Role '{invite_role_name}' not found in the server.")
-        except discord.Forbidden:
-            print(f"Missing permissions to update roles for {member.name}.")
-        except discord.HTTPException as e:
-            print(f"Failed to update roles for {member.name}: {e}")
+            member = guild.get_member(payload.user_id)
+            if member and not member.bot:
+                await self.manage_roles(member, action="remove")
