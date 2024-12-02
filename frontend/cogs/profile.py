@@ -119,11 +119,11 @@ class Profile(commands.Cog):
         embed.add_field(name="Points: ", value=self.total_points, inline=False)
         embed.add_field(name='\u200B', value="Nombres de Donjon Down :", inline=False)
 
-        embed.add_field(name=f">1 __ Down 1-50 : {await self.get_downs_in_range(0, 16, member)}",value=self.create_progress_bar(self.start_dungeons, RANGES_VALUES["1-50"] * 2),inline=False)
-        embed.add_field(name=f">50 __ Down 51-100 : {await self.get_downs_in_range(17, 42, member)}",value=self.create_progress_bar(self.early_dungeons, RANGES_VALUES["51-100"] * 2),inline=False)
-        embed.add_field(name=f">100 __ Down 101-150 : {await self.get_downs_in_range(43, 70, member)}",value=self.create_progress_bar(self.mid_dungeons, RANGES_VALUES["101-150"] * 2),inline=False)
-        embed.add_field(name=f">150 __ Down 151-200 : {await self.get_downs_in_range(71, 106, member)}",value=self.create_progress_bar(self.late_dungeons, RANGES_VALUES["151-200"] * 2),inline=False)
-        embed.add_field(name=f">200+ __ Down 200+ : {await self.get_downs_in_range(107, 127, member)}",value=self.create_progress_bar(self.end_dungeons, RANGES_VALUES["200+"] * 2),inline=False)
+        embed.add_field(name=f"▁▁▁▁▁▁▁001 à 050 ▁▁▁▁▁▁▁ kill : {await self.get_downs_in_range(0, 16, member)}",value=self.create_progress_bar(self.start_dungeons, RANGES_VALUES["1-50"] * 2),inline=False)
+        embed.add_field(name=f"▁▁▁▁▁▁▁051 à 100 ▁▁▁▁▁▁▁ kill : {await self.get_downs_in_range(17, 42, member)}",value=self.create_progress_bar(self.early_dungeons, RANGES_VALUES["51-100"] * 2),inline=False)
+        embed.add_field(name=f"▁▁▁▁▁▁▁100 à 150 ▁▁▁▁▁▁▁ kill : {await self.get_downs_in_range(43, 70, member)}",value=self.create_progress_bar(self.mid_dungeons, RANGES_VALUES["101-150"] * 2),inline=False)
+        embed.add_field(name=f"▁▁▁▁▁▁▁ 151 à 200 ▁▁▁▁▁▁▁ kill : {await self.get_downs_in_range(71, 106, member)}",value=self.create_progress_bar(self.late_dungeons, RANGES_VALUES["151-200"] * 2),inline=False)
+        embed.add_field(name=f"▁▁▁▁▁▁▁▁▁200+ ▁▁▁▁▁▁▁▁ kill : {await self.get_downs_in_range(107, 127, member)}",value=self.create_progress_bar(self.end_dungeons, RANGES_VALUES["200+"] * 2),inline=False)
         embed.add_field(name="Rank", value=self.rank, inline=False)
         return embed
 
