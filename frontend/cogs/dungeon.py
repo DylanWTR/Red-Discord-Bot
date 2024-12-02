@@ -118,8 +118,9 @@ class Dungeon(commands.Cog):
         completions[dungeon_index] += 1
 
         dungeon_level = dungeon_info["lvl"]
+        is_hard = dungeon_info.get("hard", False)
         new_points = dungeon_info["points"]
-        points_field = self.get_points_field(dungeon_level)
+        points_field = self.get_points_field(dungeon_level, is_hard)
 
         current_points = user_document["stats"]["points"]
         undo_data = {
@@ -142,7 +143,6 @@ class Dungeon(commands.Cog):
             {"completions": completions, "points": current_points}
         )
 
-        # Handle rank-up
         user_rank = user_document["stats"]["rank"]
         updated_rank = await self.check_rank_up(user_rank, current_points, user)
 
@@ -155,14 +155,15 @@ class Dungeon(commands.Cog):
 
         return undo_data, None
 
-    def get_points_field(self, dungeon_level: int) -> str:
-        """Determine the points field based on dungeon level."""
+    def get_points_field(self, dungeon_level: int, is_hard: bool) -> str:
+        """Determine the points field based on dungeon level and difficulty."""
+        if dungeon_level == 200 and is_hard:
+            return "200+"
         return (
             "1-50" if dungeon_level <= 50 else
             "51-100" if dungeon_level <= 100 else
             "101-150" if dungeon_level <= 150 else
-            "151-200" if dungeon_level <= 200 else
-            "200+"
+            "151-200"
         )
 
     async def check_rank_up(self, current_rank: str, points: dict, member: discord.Member) -> str:

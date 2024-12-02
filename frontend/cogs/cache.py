@@ -25,5 +25,6 @@ class Cache(commands.Cog):
                 try:
                     with Image.open(file_path) as img:
                         cache[file_name] = img.copy()
+                        print(f"Loaded {file_name} from {directory}.")
                 except Exception as e:
                     print(f"Failed to load {file_name} from {directory}: {e}")
