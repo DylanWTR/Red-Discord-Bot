@@ -1,6 +1,6 @@
 DUNGEONS = {
-    "Kardorim": {"dungeon": "Crypte de Kardorim", "lvl": 10, "points": 67, "index": 0},
-    # "Kardorim": {"dungeon": "Crypte de Kardorim", "lvl": 10, "points": 1, "index": 0},
+    # "Kardorim": {"dungeon": "Crypte de Kardorim", "lvl": 10, "points": 67, "index": 0},
+    "Kardorim": {"dungeon": "Crypte de Kardorim", "lvl": 10, "points": 1, "index": 0},
     "Tournesol Affamé": {"dungeon": "Grange du Tournesol Affamé", "lvl": 20, "points": 2, "index": 1},
     "Mob l'Éponge": {"dungeon": "Château Ensablé", "lvl": 20, "points": 2, "index": 2},
     "Bouftou Royal": {"dungeon": "Cour du Bouftou Royal", "lvl": 30, "points": 3, "index": 3},
@@ -18,8 +18,8 @@ DUNGEONS = {
     "Sapik": {"dungeon": "Nowel", "lvl": 50, "points": 5, "index": 15},
     "Rakoopieur": {"dungeon": "Refuge Sylvestre", "lvl": 50, "points": 5, "index": 16},
 
-    "Wa Wabbit": {"dungeon": "Château du Wa Wabbit", "lvl": 60, "points": 250, "index": 17},
-    # "Wa Wabbit": {"dungeon": "Château du Wa Wabbit", "lvl": 60, "points": 6, "index": 17},
+    # "Wa Wabbit": {"dungeon": "Château du Wa Wabbit", "lvl": 60, "points": 250, "index": 17},
+    "Wa Wabbit": {"dungeon": "Château du Wa Wabbit", "lvl": 60, "points": 6, "index": 17},
     "Blop Coco Royal": {"dungeon": "Clos des Blops", "lvl": 60, "points": 6, "index": 18},
     "Blop Griotte Royal": {"dungeon": "Clos des Blops", "lvl": 60, "points": 6, "index": 19},
     "Blop Indigo Royal": {"dungeon": "Clos des Blops", "lvl": 60, "points": 6, "index": 20},
@@ -46,8 +46,8 @@ DUNGEONS = {
     "Maître des Pantins": {"dungeon": "Théâtre de Dramak", "lvl": 100, "points": 10, "index": 41},
     "Kharnozor": {"dungeon": "Repaire du Kharnozor", "lvl": 100, "points": 10, "index": 42},
 
-    "Maître Corbac": {"dungeon": "Bibliothèque du Maître Corbac", "lvl": 110, "points": 780, "index": 43},
-    # "Maître Corbac": {"dungeon": "Bibliothèque du Maître Corbac", "lvl": 110, "points": 11, "index": 43},
+    # "Maître Corbac": {"dungeon": "Bibliothèque du Maître Corbac", "lvl": 110, "points": 780, "index": 43},
+    "Maître Corbac": {"dungeon": "Bibliothèque du Maître Corbac", "lvl": 110, "points": 11, "index": 43},
     "Papa Nowel": {"dungeon": "Caverne de Nowel", "lvl": 110, "points": 11, "index": 44},
     "Rasboul Majeur": {"dungeon": "Goulet du Rasboul", "lvl": 110, "points": 11, "index": 45},
     "Pounicheur": {"dungeon": "Miausolée du Pounicheur", "lvl": 110, "points": 11, "index": 46},
@@ -76,8 +76,8 @@ DUNGEONS = {
     "Sphincter Cell": {"dungeon": "Repaire de Sphincter Cell", "lvl": 150, "points": 15, "index": 69},
     "Hell Mina": {"dungeon": "Tertre du long sommeil", "lvl": 150, "points": 15, "index": 70},
 
-    "Kimbo": {"dungeon": "Canopée du Kimbo", "lvl": 160, "points": 1300, "index": 71, "hard": False},
-    # "Kimbo": {"dungeon": "Canopée du Kimbo", "lvl": 160, "points": 16, "index": 71, "hard": False},
+    # "Kimbo": {"dungeon": "Canopée du Kimbo", "lvl": 160, "points": 1300, "index": 71, "hard": False},
+    "Kimbo": {"dungeon": "Canopée du Kimbo", "lvl": 160, "points": 16, "index": 71, "hard": False},
     "Kanigroula": {"dungeon": "Grotte de Kanigroula", "lvl": 160, "points": 16, "index": 72, "hard": False},
     "Obsidiantre": {"dungeon": "Hypogée de l'Obsidiantre", "lvl": 160, "points": 16, "index": 73, "hard": False},
     "Minotot": {"dungeon": "Minotot", "lvl": 160, "points": 16, "index": 74, "hard": False},
@@ -114,8 +114,8 @@ DUNGEONS = {
     "Capitaine Meno": {"dungeon": "Vaisseau du Capitaine Meno", "lvl": 200, "points": 20, "index": 105, "hard": False},
     "Dantinéa": {"dungeon": "Palais de Dantinéa", "lvl": 200, "points": 20, "index": 106, "hard": False},
 
-    "Solar": {"dungeon": "Tour de Solar", "lvl": 200, "points": 2500, "index": 107, "hard": True},
-    # "Solar": {"dungeon": "Tour de Solar", "lvl": 200, "points": 22, "index": 107, "hard": True},
+    # "Solar": {"dungeon": "Tour de Solar", "lvl": 200, "points": 2500, "index": 107, "hard": True},
+    "Solar": {"dungeon": "Tour de Solar", "lvl": 200, "points": 22, "index": 107, "hard": True},
     "Bethel": {"dungeon": "Tour de Bethel", "lvl": 200, "points": 22, "index": 108, "hard": True},
     "Dazak Martegel": {"dungeon": "Brasserie du roi Dazak", "lvl": 200, "points": 22, "index": 109, "hard": True},
     "Malice": {"dungeon": "Malice", "lvl": 200, "points": 22, "index": 110, "hard": True},

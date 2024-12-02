@@ -95,14 +95,14 @@ class UserModel:
             user_document = await self.get_user(user_id)
             if not user_document:
                 print(f"User with ID {user_id} not found.")
-                return [0] * 128  # Default completions array with 128 zeros
+                return [0] * 128
 
             completions = user_document.get("stats", {}).get("completions", [])
             if not completions:
                 print(f"No completions data found for user with ID {user_id}.")
-                return [0] * 128  # Default completions array with 128 zeros
+                return [0] * 128
 
             return completions
         except Exception as e:
             print(f"Error retrieving completions for user {user_id}: {e}")
-            return [0] * 128  # Return a default array in case of error
+            return [0] * 128

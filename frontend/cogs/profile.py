@@ -4,13 +4,12 @@ from discord.ext import commands
 from io import BytesIO
 from backend.models.user_model import UserModel
 from config.ranks import RANGES_VALUES
-from config.emojis import EMOJI_LOGO, EMOJI_COLOR
+from config.emojis import EMOJI_LOGO, EMOJI_COLOR, EMOJI_ARTWORK
 
 class Profile(commands.Cog):
-    def __init__(self, bot: commands.Bot, user_model: UserModel, classes: dict):
+    def __init__(self, bot: commands.Bot, user_model: UserModel):
         self.bot = bot
         self.user_model = user_model
-        self.classes = classes
         self.cache_cog = self.bot.get_cog("Cache")
 
         self.matching_role = None
@@ -98,7 +97,7 @@ class Profile(commands.Cog):
 
     async def get_downs_in_range(self, start_index: int, end_index: int, member: discord.Member) -> int:
         """Calculate the total downs in a specific range of the completions array."""
-        completions = await self.user_model.get_user_completions(member.id)  # Await the completions fetch
+        completions = await self.user_model.get_user_completions(member.id)
         return sum(completions[start_index:end_index + 1]) if completions else 0
 
     async def create_profile_embed(self, member: discord.Member):
@@ -139,7 +138,7 @@ class Profile(commands.Cog):
 
     def get_matching_role(self, member: discord.Member):
         """Find the first role matching a key in `classes` (case-insensitive)."""
-        class_keys_lower = {key.lower(): key for key in self.classes}
+        class_keys_lower = {key.lower(): key for key in EMOJI_ARTWORK}
         for role in member.roles:
             role_name_lower = role.name.lower()
             if role_name_lower in class_keys_lower:
