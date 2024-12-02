@@ -34,7 +34,7 @@ class Profile(commands.Cog):
         self.populate_fields(user_document)
         await self.prepare_images(interaction, member)
 
-        embed = self.create_profile_embed(member)
+        embed = await self.create_profile_embed(member)
         await self.send_embed(interaction, embed)
 
     async def fetch_user_document(self, interaction: discord.Interaction, member: discord.Member):
@@ -58,6 +58,9 @@ class Profile(commands.Cog):
         self.late_dungeons = int(points.get("151-200", 0))
         self.end_dungeons = int(points.get("200+", 0))
         self.rank = stats.get("rank", "Unranked")
+
+        completions = stats.get("completions", [])
+        self.completions = completions if completions else [0] * 128
 
     async def prepare_images(self, interaction: discord.Interaction, member: discord.Member):
         """Retrieve and cache thumbnail and rank images."""
@@ -93,8 +96,13 @@ class Profile(commands.Cog):
 
         return f"{left_bar} | {right_bar} {percentage:.0f}%"
 
-    def create_profile_embed(self, member: discord.Member):
-        """Create the profile embed."""
+    async def get_downs_in_range(self, start_index: int, end_index: int, member: discord.Member) -> int:
+        """Calculate the total downs in a specific range of the completions array."""
+        completions = await self.user_model.get_user_completions(member.id)  # Await the completions fetch
+        return sum(completions[start_index:end_index + 1]) if completions else 0
+
+    async def create_profile_embed(self, member: discord.Member):
+        """Create the profile embed with updated field names and completion data."""
         class_logo = EMOJI_LOGO.get(self.matching_role.lower(), "") if self.matching_role else ""
         class_display = f"{class_logo} **{self.matching_role}**" if self.matching_role else "None"
 
@@ -106,14 +114,16 @@ class Profile(commands.Cog):
             description=f"**Classe:** {class_display}",
             color=embed_color
         )
+
         embed.add_field(name='\u200B', value="\u200B", inline=False)
         embed.add_field(name="Points: ", value=self.total_points, inline=False)
         embed.add_field(name='\u200B', value="Nombres de Donjon Down :", inline=False)
-        embed.add_field(name="1-50",value=self.create_progress_bar(self.start_dungeons, RANGES_VALUES["1-50"] * 2),inline=False)
-        embed.add_field(name="51-100",value=self.create_progress_bar(self.early_dungeons, RANGES_VALUES["51-100"] * 2),inline=False)
-        embed.add_field(name="101-150",value=self.create_progress_bar(self.mid_dungeons, RANGES_VALUES["101-150"] * 2),inline=False)
-        embed.add_field(name="151-200",value=self.create_progress_bar(self.late_dungeons, RANGES_VALUES["151-200"] * 2),inline=False)
-        embed.add_field(name="200+",value=self.create_progress_bar(self.end_dungeons, RANGES_VALUES["200+"] * 2),inline=False)
+
+        embed.add_field(name=f">1 __ Down 1-50 : {await self.get_downs_in_range(0, 16, member)}",value=self.create_progress_bar(self.start_dungeons, RANGES_VALUES["1-50"] * 2),inline=False)
+        embed.add_field(name=f">50 __ Down 51-100 : {await self.get_downs_in_range(17, 42, member)}",value=self.create_progress_bar(self.early_dungeons, RANGES_VALUES["51-100"] * 2),inline=False)
+        embed.add_field(name=f">100 __ Down 101-150 : {await self.get_downs_in_range(43, 70, member)}",value=self.create_progress_bar(self.mid_dungeons, RANGES_VALUES["101-150"] * 2),inline=False)
+        embed.add_field(name=f">150 __ Down 151-200 : {await self.get_downs_in_range(71, 106, member)}",value=self.create_progress_bar(self.late_dungeons, RANGES_VALUES["151-200"] * 2),inline=False)
+        embed.add_field(name=f">200+ __ Down 200+ : {await self.get_downs_in_range(107, 127, member)}",value=self.create_progress_bar(self.end_dungeons, RANGES_VALUES["200+"] * 2),inline=False)
         embed.add_field(name="Rank", value=self.rank, inline=False)
         return embed
 

@@ -85,3 +85,24 @@ class UserModel:
         except Exception as e:
             print(f"Error updating stats for user {user_id}: {e}")
             return False
+
+    async def get_user_completions(self, user_id: int) -> list[int]:
+        """
+        Retrieve the 'completions' array for a specific user.
+        If the user or completions data is missing, return an array of 128 zeros.
+        """
+        try:
+            user_document = await self.get_user(user_id)
+            if not user_document:
+                print(f"User with ID {user_id} not found.")
+                return [0] * 128  # Default completions array with 128 zeros
+
+            completions = user_document.get("stats", {}).get("completions", [])
+            if not completions:
+                print(f"No completions data found for user with ID {user_id}.")
+                return [0] * 128  # Default completions array with 128 zeros
+
+            return completions
+        except Exception as e:
+            print(f"Error retrieving completions for user {user_id}: {e}")
+            return [0] * 128  # Return a default array in case of error
