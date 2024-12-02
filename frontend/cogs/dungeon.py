@@ -26,19 +26,20 @@ class Dungeon(commands.Cog):
         extra_7: Optional[discord.Member] = None
     ):
         """Slash command to process a dungeon for multiple participants."""
-        dungeon_info = self.get_dungeon_info(boss_name)
-        if not dungeon_info:
+        dungeon_data = self.get_dungeon_info(boss_name)
+        if not dungeon_data:
             await interaction.response.send_message(
                 f"Pas de donjon trouvé pour '{boss_name}'.", ephemeral=True
             )
             return
 
+        dungeon_info, dungeon_key = dungeon_data
         users_to_update = self.prepare_users(interaction, extra_1, extra_2, extra_3, extra_4, extra_5, extra_6, extra_7)
         if not await self.validate_users(users_to_update, interaction):
             return
 
         participant_mentions = ", ".join(user.mention for user in users_to_update)
-        response_message = self.format_dungeon_info(dungeon_info)
+        response_message = self.format_dungeon_info(dungeon_info, dungeon_key)
         response_message += f"**Participants**: {participant_mentions}\n\n"
 
         rank_up_messages = []
@@ -61,7 +62,7 @@ class Dungeon(commands.Cog):
 
         await interaction.response.send_message(response_message)
 
-    def get_dungeon_info(self, boss_name: str) -> Optional[dict]:
+    def get_dungeon_info(self, boss_name: str) -> Optional[tuple[dict, str]]:
         """Find and return dungeon info based on the boss name."""
         boss_name_lower = boss_name.lower()
         closest_match = get_close_matches(
@@ -73,7 +74,7 @@ class Dungeon(commands.Cog):
         if not closest_match:
             return None
         matched_boss = next(key for key in DUNGEONS if key.lower() == closest_match[0])
-        return DUNGEONS.get(matched_boss)
+        return DUNGEONS.get(matched_boss), matched_boss
 
     def prepare_users(self, interaction: discord.Interaction, *extras: Optional[discord.Member]) -> list[discord.Member]:
         """Prepare a list of unique users to process."""
@@ -93,11 +94,12 @@ class Dungeon(commands.Cog):
                 return False
         return True
 
-    def format_dungeon_info(self, dungeon_info: dict) -> str:
+    def format_dungeon_info(self, dungeon_info: dict, dungeon_key: str) -> str:
         """Format dungeon information for the response."""
+        boss_name = dungeon_info.get("boss", dungeon_key)
         return (
             f"**Donjon**: {dungeon_info['dungeon']}\n"
-            f"**Boss**: {dungeon_info.get('boss', 'Inconnu')}\n"
+            f"**Boss**: {boss_name}\n"
             f"**Niveau**: {dungeon_info['lvl']}\n"
             f"**Points gagnés**: {dungeon_info['points']}\n\n"
         )
