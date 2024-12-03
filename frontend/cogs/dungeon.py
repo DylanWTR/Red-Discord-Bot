@@ -12,7 +12,7 @@ class Dungeon(commands.Cog):
         self.bot = bot
         self.user_model = user_model
 
-    @app_commands.command(name="down", description="Find and display dungeon info and update completion stats.")
+    @app_commands.command(name="down", description="Valide un donjon et met à jour les stats des participants.")
     async def down(
         self,
         interaction: discord.Interaction,

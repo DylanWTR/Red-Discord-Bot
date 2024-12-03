@@ -23,7 +23,7 @@ class Profile(commands.Cog):
         self.thumbnail = None
         self.image = None
 
-    @app_commands.command(name="profile", description="Display the profile of a user.")
+    @app_commands.command(name="profil", description="Affiche le profil d'un utilisateur.")
     async def profile(self, interaction: discord.Interaction, member: discord.Member = None):
         member = member or interaction.user
         user_document = await self.fetch_user_document(interaction, member)
